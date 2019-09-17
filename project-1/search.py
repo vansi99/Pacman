@@ -194,13 +194,62 @@ def nullHeuristic(state, problem=None):
     goal in the provided SearchProblem.  This heuristic is trivial.
     """
     return 0
+from util import PriorityQueue
+class MyPriorityQueueWithFunction(PriorityQueue):
+    """
+    Implements a priority queue with the same push/pop signature of the
+    Queue and the Stack classes. This is designed for drop-in replacement for
+    those two classes. The caller has to provide a priority function, which
+    extracts each item's priority.
+    """
+    def  __init__(self, problem, priorityFunction):
+        "priorityFunction (item) -> priority"
+        self.priorityFunction = priorityFunction      # store the priority function
+        PriorityQueue.__init__(self)        # super-class initializer
+        self.problem = problem
+    def push(self, item, heuristic):
+        "Adds an item to the queue with priority from the priority function"
+        PriorityQueue.push(self, item, self.priorityFunction(self.problem,item,heuristic))
+
+# Calculate f(n) = g(n) + h(n) #
+def f(problem,state,heuristic):
+    return problem.getCostOfActions(state[1]) + heuristic(state[0],problem)
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
 
+    queue_xy = MyPriorityQueueWithFunction(problem,f)
 
+    path = []
+    visited = []
+
+    if problem.isGoalState(problem.getStartState()):
+        return []
+
+    queue_xy.push((problem.getStartState(),[]),heuristic)
+
+    while(True):
+        if queue_xy.isEmpty():
+            return []
+
+        xy,path = queue_xy.pop()
+
+        if xy in visited:
+            continue
+
+        visited.append(xy)
+
+        if problem.isGoalState(xy):
+            return path
+
+        successors = problem.getSuccessors(xy)
+
+        if successors:
+            for item in successors:
+                if item[0] not in visited:
+                    newPath = path + [item[1]]
+                    queue_xy.push((item[0], newPath), heuristic)
 # Abbreviations
 bfs = breadthFirstSearch
 dfs = depthFirstSearch
