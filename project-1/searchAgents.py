@@ -360,7 +360,6 @@ class CornersProblem(search.SearchProblem):
         self._expanded += 1  # DO NOT CHANGE
         return successors
 
-
     def getCostOfActions(self, actions):
         """
         Returns the cost of a particular sequence of actions.  If those actions
@@ -400,8 +399,9 @@ def cornersHeuristic(state, problem):
         distancesFromGoals = []
         for index, item in enumerate(state[1]):
             if item == 0:
-                distancesFromGoals.append(manhattanDistance(state[0],corners[index]))
+                distancesFromGoals.append(manhattanDistance(state[0], corners[index]))
         return max(distancesFromGoals)
+
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -501,6 +501,17 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
+    foods = foodGrid.asList()
+
+    if problem.isGoalState(state):
+        return 0
+
+    distance = []
+
+    for item in foods:
+        distance.append(util.manhattanDistance(position, item))
+    return max(distance)
+
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -533,6 +544,9 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
+        from search import breadthFirstSearch
+        return breadthFirstSearch(problem)
+
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
@@ -568,6 +582,13 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         x, y = state
 
         "*** YOUR CODE HERE ***"
+        foodL = self.food.asList()
+
+        # State reach food #
+        if state in foodL:
+            return True
+        else:
+            return False
 
 
 def mazeDistance(point1, point2, gameState):
