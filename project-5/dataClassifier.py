@@ -75,46 +75,39 @@ def enhancedFeatureExtractorDigit(datum):
 
     ##
     """
-    features =  basicFeatureExtractorDigit(datum)
-    count = 1
+    features = basicFeatureExtractorDigit(datum)
     "*** YOUR CODE HERE ***"
-    for x in range(DIGIT_DATUM_HEIGHT):
-        freqPix = feature = pix = otherFeat = 0
-        for y in range(DIGIT_DATUM_WIDTH):
-            temp = datum.getPixel(x,y)
-            white = temp > 0
-            grey = temp == 0
-            condFirst = 0
-            if feature == 0 and white:
-                condFirst = 1
-            auxCond = 0
-            if feature == 1 and grey: 
-                auxCond = 1
-            featFirst = 0
-            if pix == 0 and auxCond:
-                featFirst = 1
-            condSecond = 0
-            if feature == 1 and pix == 1 and white:
-                condSecond = 1
-            featSecond = 0
-            if pix == 1 and otherFeat == 1 and auxCond:
-                featSecond = 1
-            if condFirst:
-                feature = 1
-            if featFirst:
-                pix = 1
-            if condSecond:
-                otherFeat = 1
-            if featSecond:
-                freqPix = freqPix + 1
-                feature = pix = otherFeat = 0
-            if freqPix > 0:
-                features[count] = 1
-            else:
-                features[count] = 0
-            count+=1
+    number = numberOfWhite(features.copy()) 
+    features["1_white_region"] = 0
+    features["2_white_region"] = 0
+    features["3_white_region"] = 0
+    if number == 1:
+        features["1_white_region"] = 1
+    if number == 2:
+        features["2_white_region"] = 1
+    if number == 3:
+        features["3_white_region"] = 1
     return features
 
+def numberOfWhite(features):
+    number = 0
+    for x in range(DIGIT_DATUM_WIDTH):
+        for y in range(DIGIT_DATUM_HEIGHT):
+            if features[x,y] == 0:
+                dfs(x,y, features)
+                number += 1
+    return number
+
+def dfs(x, y, features):
+    if features[x,y] == 1:
+        return
+    features[x,y] = 1
+    successors = [(1,0), (-1,0), (0,-1), (0,1)]
+    for successor in successors:
+        predict_move = (successor[0] + x, successor[1] + y)
+        if predict_move[0] >= DIGIT_DATUM_WIDTH or predict_move[0] < 0 or predict_move[1] >=DIGIT_DATUM_HEIGHT or predict_move[1] < 0:
+            continue
+        dfs(predict_move[0],predict_move[1], features)
 
 
 def basicFeatureExtractorPacman(state):
